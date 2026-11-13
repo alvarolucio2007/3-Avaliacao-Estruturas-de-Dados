@@ -5,6 +5,6 @@ from dataclasses import dataclass
 class Livro:
     id:int
     nome:str
-    valor_em_centavos:int
+    valor:float
     estoque:int
     emprestado:bool
