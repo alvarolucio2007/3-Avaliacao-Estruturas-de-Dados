@@ -33,7 +33,7 @@ class FilaReservas:
         if self.esta_vazia():
             self.inicio = novo
         else:
-            self.fim.proximo = novo
+            self.fim.proximo = novo  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
 
         self.fim = novo
         self.tamanho += 1
@@ -42,8 +42,8 @@ class FilaReservas:
         if self.esta_vazia():
             return None
 
-        matricula = self.inicio.matricula
-        self.inicio = self.inicio.proximo
+        matricula = self.inicio.matricula  # pyright: ignore[reportOptionalMemberAccess]
+        self.inicio = self.inicio.proximo  # pyright: ignore[reportOptionalMemberAccess]
         self.tamanho -= 1
 
         if self.inicio is None:
@@ -54,7 +54,7 @@ class FilaReservas:
     def consultar_proximo(self):
         if self.esta_vazia():
             return None
-        return self.inicio.matricula
+        return self.inicio.matricula  # pyright: ignore[reportOptionalMemberAccess]
 
     def __len__(self):
         return self.tamanho
