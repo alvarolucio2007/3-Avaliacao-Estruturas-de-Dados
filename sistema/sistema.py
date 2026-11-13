@@ -1,5 +1,7 @@
+from typing import Any
+
 from sistema.estruturas import PilhaGenerica
-from sistema.funcoes import FilaReservas
+from sistema.funcoes import FilaReservas, GrafoCampi
 from sistema.livro import Livro
 
 
@@ -8,7 +10,9 @@ class Sistema:
         self.contador_livro_id=0
         self.lista_livros:list[Livro]=[]
         self.dict_livros:dict[int,Livro]={}
-        self.fila_reserva=FilaReservas
+        self.fila_reserva=FilaReservas()
+        self.pilha_emprestimo:PilhaGenerica[Livro]=PilhaGenerica([])
+        self.grafo_campi=GrafoCampi()
 
     def render_menu(self)->int:
         print("Menu Principal")
@@ -68,3 +72,81 @@ class Sistema:
     def procurar_por_titulo(self)->None:
         titulo=input("Por favor, insira o título do livro")
         print(f"O livro {titulo} existe." if any(l.nome == titulo for l in self.lista_livros) else "O livro não existe." )
+    def reservar_livro(self)->None:
+        while True:
+            try:
+                id=int(input("Por favor, selecione um ID"))
+                if id>0:
+                    livro=self.dict_livros.get(id)
+                    if livro is not None:
+                        self.fila_reserva.enfileirar(livro)
+                        print(f"livro {livro.nome} foi adicionado com sucesso.")
+                    else:
+                        print("Livro não existe.")
+                raise ValueError
+            except ValueError:
+                print("Por favor, insira apenas numeros maiores que zero!")
+    def ler_reservas(self)->Any|None:
+        return self.fila_reserva.desenfileirar()
+    def emprestar_livro(self)->None:
+        while True:
+            try:
+                id=int(input("Por favor, selecione um ID"))
+                if id>0:
+                    livro=self.dict_livros.get(id)
+                    if livro is not None:
+                        self.pilha_emprestimo.adicionar(livro)
+                        print(f"livro {livro.nome} foi adicionado com sucesso.")
+                    else:
+                        print("Livro não existe.")
+                raise ValueError
+            except ValueError:
+                print("Por favor, insira apenas numeros maiores que zero!")
+    def remover_ultimo_emprestimo(self)->None:
+        try:
+            livro=self.pilha_emprestimo.remover()
+        except IndexError:
+            print("Não há empréstimos.")
+            return
+        print(f"livro {livro.nome} foi removido com sucesso.")
+    def transferir_campus_livro(self)->None:
+        while True:
+            try:
+                id=int(input("Por favor, selecione um ID"))
+                if id>0:
+                    livro=self.dict_livros.get(id)
+                    if livro is not None:
+                        self.pilha_emprestimo.adicionar(livro)
+                        print(f"livro {livro.nome} foi adicionado com sucesso.")
+                    else:
+                        print("Livro não existe.")
+                        continue
+                    id_campus_origem=int(input("Por favor, selecione o campus de origem do livro (Anexo 1, 2 e 3, apenas números.)"))
+                    if id_campus_origem>0 and id_campus_origem in [1,2,3]:
+                        self.grafo_campi.adicionar_campus(id_campus_origem)
+                    else:
+                        print("Por favor, insira apenas números de 1 a 3.")
+                        continue
+                    id_campus_destino=int(input("Por favor, selecione o campus de destino do livro (Anexo 1, 2 e 3, apenas números.)"))
+                    if id_campus_origem>0 and id_campus_origem in [1,2,3]:
+                        if id_campus_destino==id_campus_origem:
+                            print("IDs não podem ser iguais.")
+                            continue
+                        self.grafo_campi.adicionar_campus(id_campus_destino)
+                        self.grafo_campi.adicionar_transferencia(id_campus_origem,id_campus_destino)
+                    else:
+                        print("Por favor, insira apenas números de 1 a 3.")
+                        continue
+            except ValueError:
+                print("Por favor, insira apenas numeros maiores que zero!")
+    def campus_alcancaveis_duas_transferencias(self)->None:
+        while True:
+            try:
+                id_campus=int(input("Por favor, selecione o campus de origem do livro (Anexo 1, 2 e 3, apenas números.)"))
+                if id_campus>0 and id_campus in [1,2,3]:
+                    print(sorted(self.grafo_campi.campi_ate_duas_transferencias(id_campus)))
+                else:
+                    print("Por favor, insira apenas números de 1 a 3.")
+                    continue
+            except ValueError:
+                print("Por favor, insira apenas numeros maiores que zero!")
